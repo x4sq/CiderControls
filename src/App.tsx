@@ -7,6 +7,7 @@ const App = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.5); // Default volume set to 50%
   const [nowPlaying, setNowPlaying] = useState({ title: '', artist: '' });
+  const [previousNowPlaying, setPreviousNowPlaying] = useState({ title: '', artist: '' });
   const [playbackTime, setPlaybackTime] = useState(0);
   const [playbackDuration, setPlaybackDuration] = useState(0);
 
@@ -24,17 +25,18 @@ const App = () => {
     fetchVolume();
   }, []);
 
-  useEffect(() => {
-    const fetchNowPlaying = async () => {
-      try {
-        const response = await fetch('http://localhost:10767/api/v1/playback/now-playing');
-        const data = await response.json();
-        setNowPlaying({ title: data.info.name, artist: data.info.artistName });
-      } catch (error) {
-        console.error('Error fetching now playing:', error);
-      }
-    };
+  const fetchNowPlaying = async () => {
+    try {
+      const response = await fetch('http://localhost:10767/api/v1/playback/now-playing');
+      const data = await response.json();
+      setNowPlaying({ title: data.info.name, artist: data.info.artistName });
+      setPreviousNowPlaying({ title: data.info.name, artist: data.info.artistName });
+    } catch (error) {
+      console.error('Error fetching now playing:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchNowPlaying();
   }, []);
 
@@ -46,9 +48,14 @@ const App = () => {
     });
 
     socket.on('API:Playback', (data) => {
+      if (data.type === 'playbackStatus.playbackTimeDidChange') {
         setPlaybackTime(data.data.currentPlaybackTime);
         setPlaybackDuration(data.data.currentPlaybackDuration);
         setIsPlaying(data.data.isPlaying);
+
+        // Fetch now playing information when playback time changes
+        fetchNowPlaying();
+      }
     });
 
     socket.on('disconnect', () => {
