@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.5); // Default volume set to 50%
+  const [volume, setVolume] = useState(0.5);
   const [nowPlaying, setNowPlaying] = useState({ title: '', artist: '' });
   const [previousNowPlaying, setPreviousNowPlaying] = useState({ title: '', artist: '' });
   const [playbackTime, setPlaybackTime] = useState(0);
@@ -33,6 +33,16 @@ const App = () => {
       setPreviousNowPlaying({ title: data.info.name, artist: data.info.artistName });
     } catch (error) {
       console.error('Error fetching now playing:', error);
+    }
+  };
+
+  const fetchPlaybackState = async () => {
+    try {
+      const response = await fetch('http://localhost:10767/api/v1/playback/is-playing');
+      const data = await response.json();
+      setIsPlaying(data.isPlaying);
+    } catch (error) {
+      console.error('Error fetching playback state:', error);
     }
   };
 
@@ -101,6 +111,17 @@ const App = () => {
     }
   };
 
+  const handlePlayPause = async () => {
+    try {
+      await fetch('http://localhost:10767/api/v1/playback/playpause', {
+        method: 'POST',
+      });
+      fetchPlaybackState();
+    } catch (error) {
+      console.error('Error toggling play/pause:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
       <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-96">
@@ -133,7 +154,7 @@ const App = () => {
           </button>
           <button 
             className="bg-blue-500 p-4 rounded-full hover:bg-blue-600 transition-colors"
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={handlePlayPause}
           >
             {isPlaying ? <Pause size={24} /> : <Play size={24} />}
           </button>
