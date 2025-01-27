@@ -53,7 +53,7 @@ const App = () => {
         setPlaybackDuration(data.data.currentPlaybackDuration);
         setIsPlaying(data.data.isPlaying);
 
-        // Fetch now playing information when playback time changes
+
         fetchNowPlaying();
       }
     });
@@ -67,10 +67,38 @@ const App = () => {
     };
   }, []);
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVolumeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
-    // You might want to send the new volume to the API here
+
+    try {
+      await fetch('http://localhost:10767/api/v1/playback/volume', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ volume: newVolume }),
+      });
+    } catch (error) {
+      console.error('Error setting volume:', error);
+    }
+  };
+
+  const handleSeekChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPlaybackTime = parseFloat(e.target.value);
+    setPlaybackTime(newPlaybackTime);
+
+    try {
+      await fetch('http://localhost:10767/api/v1/playback/seek', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ position: newPlaybackTime }),
+      });
+    } catch (error) {
+      console.error('Error seeking playback:', error);
+    }
   };
 
   return (
@@ -84,9 +112,15 @@ const App = () => {
         </div>
         {/* Progress Bar */}
         <div className="mb-6">
-          <div className="h-1 bg-gray-700 rounded-full">
-            <div className="h-1 bg-blue-500 rounded-full" style={{ width: `${(playbackTime / playbackDuration) * 100}%` }}></div>
-          </div>
+          <input
+            type="range"
+            min="0"
+            max={playbackDuration}
+            step="0.01"
+            value={playbackTime}
+            onChange={handleSeekChange}
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+          />
           <div className="flex justify-between text-gray-400 text-sm mt-1">
             <span>{Math.floor(playbackTime / 60)}:{Math.floor(playbackTime % 60).toString().padStart(2, '0')}</span>
             <span>{Math.floor(playbackDuration / 60)}:{Math.floor(playbackDuration % 60).toString().padStart(2, '0')}</span>
