@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX } from 'lucide-react';
+import io from 'socket.io-client';
 
 const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.5); // Default volume set to 50%
   const [nowPlaying, setNowPlaying] = useState({ title: '', artist: '' });
+  const [playbackTime, setPlaybackTime] = useState(0);
+  const [playbackDuration, setPlaybackDuration] = useState(0);
+
+  useEffect(() => {
+    const fetchVolume = async () => {
+      try {
+        const response = await fetch('http://localhost:10767/api/v1/playback/volume');
+        const data = await response.json();
+        setVolume(data.volume);
+      } catch (error) {
+        console.error('Error fetching volume:', error);
+      }
+    };
+
+    fetchVolume();
+  }, []);
 
   useEffect(() => {
     const fetchNowPlaying = async () => {
@@ -22,17 +39,25 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const fetchVolume = async () => {
-      try {
-        const response = await fetch('http://localhost:10767/api/v1/playback/volume');
-        const data = await response.json();
-        setVolume(data.volume);
-      } catch (error) {
-        console.error('Error fetching volume:', error);
-      }
-    };
+    const socket = io('http://localhost:10767');
 
-    fetchVolume();
+    socket.on('connect', () => {
+      console.log('Connected to socket.io server');
+    });
+
+    socket.on('API:Playback', (data) => {
+        setPlaybackTime(data.data.currentPlaybackTime);
+        setPlaybackDuration(data.data.currentPlaybackDuration);
+        setIsPlaying(data.data.isPlaying);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from socket.io server');
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,11 +78,11 @@ const App = () => {
         {/* Progress Bar */}
         <div className="mb-6">
           <div className="h-1 bg-gray-700 rounded-full">
-            <div className="h-1 bg-blue-500 rounded-full w-1/3"></div>
+            <div className="h-1 bg-blue-500 rounded-full" style={{ width: `${(playbackTime / playbackDuration) * 100}%` }}></div>
           </div>
           <div className="flex justify-between text-gray-400 text-sm mt-1">
-            <span>1:23</span>
-            <span>3:45</span>
+            <span>{Math.floor(playbackTime / 60)}:{Math.floor(playbackTime % 60).toString().padStart(2, '0')}</span>
+            <span>{Math.floor(playbackDuration / 60)}:{Math.floor(playbackDuration % 60).toString().padStart(2, '0')}</span>
           </div>
         </div>
         {/* Controls */}
