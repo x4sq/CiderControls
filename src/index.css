@@ -1,14 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@400;500;700&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 body {
   margin: 0;
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(to bottom, #4b0082, #8a2be2);
-  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364); /* New dark gradient background */
+  color: #f5f5f5; /* Light text color for better readability */
 }
 
 .min-h-screen {
@@ -16,19 +15,31 @@ body {
 }
 
 .bg-gradient-to-b {
-  background: linear-gradient(to bottom, #4b0082, #8a2be2);
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364); /* New dark gradient background */
 }
 
 .bg-gray-800 {
-  background-color: rgba(45, 45, 45, 0.8); /* Updated to be semi-transparent */
+  background-color: rgba(31, 31, 31, 0.9); /* Semi-transparent dark background */
+}
+
+.bg-white {
+  background-color: #fff;
+}
+
+.text-gray-800 {
+  color: #333;
 }
 
 .text-gray-200 {
   color: #e5e5e5;
 }
 
+.text-gray-600 {
+  color: #666;
+}
+
 .text-gray-400 {
-  color: #a3a3a3;
+  color: #999;
 }
 
 .text-gray-500 {
@@ -36,7 +47,11 @@ body {
 }
 
 .shadow-2xl {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .rounded-2xl {
@@ -51,16 +66,32 @@ body {
   transition: color 0.3s, background-color 0.3s;
 }
 
+.transition-all {
+  transition: all 0.3s ease;
+}
+
 .hover\:text-white:hover {
   color: #fff;
+}
+
+.hover\:text-black:hover {
+  color: #000;
 }
 
 .hover\:bg-teal-600:hover {
   background-color: #0d9488;
 }
 
+.hover\:bg-yellow-600:hover {
+  background-color: #f59e0b;
+}
+
 .bg-teal-500 {
   background-color: #14b8a6;
+}
+
+.bg-yellow-500 {
+  background-color: #fbbf24;
 }
 
 .bg-blue-500 {
@@ -75,11 +106,31 @@ body {
   width: 100%;
 }
 
+.full-width {
+  width: 100%;
+}
+
 .h-2 {
   height: 0.5rem;
 }
 
+.height-small {
+  height: 0.5rem;
+}
+
+.h-3 {
+  height: 0.75rem;
+}
+
+.height-medium {
+  height: 0.75rem;
+}
+
 .appearance-none {
+  appearance: none;
+}
+
+.no-appearance {
   appearance: none;
 }
 
@@ -87,11 +138,23 @@ body {
   cursor: pointer;
 }
 
+.pointer-cursor {
+  cursor: pointer;
+}
+
 .flex {
   display: flex;
 }
 
+.flex-container {
+  display: flex;
+}
+
 .items-center {
+  align-items: center;
+}
+
+.align-center {
   align-items: center;
 }
 
@@ -103,7 +166,15 @@ body {
   gap: 1rem;
 }
 
+.gap-small {
+  gap: 1rem;
+}
+
 .gap-6 {
+  gap: 1.5rem;
+}
+
+.gap-medium {
   gap: 1.5rem;
 }
 
@@ -140,7 +211,7 @@ body {
 }
 
 .shadow-lg {
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
 }
 
 .mx-auto {
@@ -152,8 +223,12 @@ body {
   outline: 2px solid rgba(255, 255, 255, 0.5);
 }
 
+.outline-black {
+  outline: 2px solid rgba(0, 0, 0, 0.5);
+}
+
 .bg-faded {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .font-roboto {
@@ -175,4 +250,97 @@ body {
 
 .rainbow-slider {
   animation: rainbow 10s linear infinite;
+}
+
+/* New styles for progress bar, volume bar, and pause button */
+.progress-bar {
+  width: 100%;
+  height: 0.75rem;
+  background-color: #444;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 50%; /* Example width, you can set this dynamically */
+  background-color: #3b82f6;
+  border-radius: 0.375rem;
+}
+
+.progress-bar input[type="range"] {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  z-index: 1;
+}
+
+.progress-bar input[type="range"]::-webkit-slider-thumb {
+  width: 1rem;
+  height: 1rem;
+  background-color: #ff6347; /* Tomato color */
+  border-radius: 50%;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.volume-bar {
+  width: 100%;
+  height: 0.75rem;
+  background-color: #444;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.volume-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 50%; /* Example width, you can set this dynamically */
+  background-color: #14b8a6;
+  border-radius: 0.375rem;
+}
+
+.volume-bar input[type="range"] {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  z-index: 1;
+}
+
+.volume-bar input[type="range"]::-webkit-slider-thumb {
+  width: 1rem;
+  height: 1rem;
+  background-color: #32cd32; /* LimeGreen color */
+  border-radius: 50%;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.pause-button {
+  background-color: #ff6347; /* Tomato color */
+  color: #fff;
+  padding: 1rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.pause-button:hover {
+  background-color: #ff4500; /* OrangeRed color */
+  transform: scale(1.1);
 }
