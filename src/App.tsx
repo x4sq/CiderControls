@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX } from 'lucide-react';
 import io from 'socket.io-client';
+import './index.css'; // Import the CSS file
 
 const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -35,7 +36,7 @@ const App = () => {
       setNowPlaying({ 
         title: data.info.name, 
         artist: data.info.artistName, 
-        artwork: data.info.artwork.url.replace('{w}', '3000').replace('{h}', '3000') 
+        artwork: data.info.artwork.url.replace('{w}', '600').replace('{h}', '600') 
       });
     } catch (error) {
       console.error('Error fetching now playing:', error);
@@ -151,14 +152,14 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
-      <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-96">
+    <div className="min-h-screen rainbow-background flex items-center justify-center">
+      <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-96 outline-white bg-faded">
         {/* Now Playing Section */}
         <div className="mb-8 text-center">
-          <h2 className="text-gray-200 text-lg font-semibold mb-2">Now Playing</h2>
+          <h2 className="text-gray-200 text-lg font-semibold mb-2 font-montserrat">Now Playing</h2>
           <img src={nowPlaying.artwork} alt="Artwork" className="mb-4 w-48 h-48 mx-auto rounded-lg shadow-lg" />
-          <p className="text-gray-400">{nowPlaying.title || 'Song Title'}</p>
-          <p className="text-gray-500 text-sm">{nowPlaying.artist || 'Artist Name'}</p>
+          <p className="text-gray-400 font-roboto">{nowPlaying.title || 'Song Title'}</p>
+          <p className="text-gray-500 text-sm font-roboto">{nowPlaying.artist || 'Artist Name'}</p>
         </div>
         {/* Progress Bar */}
         <div className="mb-6">
@@ -169,32 +170,32 @@ const App = () => {
             step="0.01"
             value={playbackTime}
             onChange={handleSeekChange}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer rainbow-element"
           />
-          <div className="flex justify-between text-gray-400 text-sm mt-1">
+          <div className="flex justify-between text-gray-400 text-sm mt-1 font-roboto">
             <span>{Math.floor(playbackTime / 60)}:{Math.floor(playbackTime % 60).toString().padStart(2, '0')}</span>
             <span>{Math.floor(playbackDuration / 60)}:{Math.floor(playbackDuration % 60).toString().padStart(2, '0')}</span>
           </div>
         </div>
         {/* Controls */}
         <div className="flex items-center justify-center gap-6 mb-8">
-          <button className="text-gray-400 hover:text-white transition-colors" onClick={handlePrevious}>
+          <button className="text-gray-400 hover:text-white transition-colors rainbow-element" onClick={handlePrevious}>
             <SkipBack size={24} />
           </button>
           <button 
-            className="bg-blue-500 p-4 rounded-full hover:bg-blue-600 transition-colors"
+            className="bg-gradient-to-r from-pink-500 to-yellow-500 p-4 rounded-full hover:from-pink-600 hover:to-yellow-600 transition-colors rainbow-element"
             onClick={handlePlayPause}
           >
             {isPlaying ? <Pause size={24} /> : <Play size={24} />}
           </button>
-          <button className="text-gray-400 hover:text-white transition-colors" onClick={handleNext}>
+          <button className="text-gray-400 hover:text-white transition-colors rainbow-element" onClick={handleNext}>
             <SkipForward size={24} />
           </button>
         </div>
         {/* Volume Control */}
         <div className="flex items-center gap-4">
           <button 
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors rainbow-element"
             onClick={() => setIsMuted(!isMuted)}
           >
             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
@@ -206,7 +207,7 @@ const App = () => {
             step="0.001"
             value={volume}
             onChange={handleVolumeChange}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer rainbow-element"
           />
         </div>
       </div>
