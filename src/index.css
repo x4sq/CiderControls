@@ -20,7 +20,7 @@ body {
 }
 
 .bg-gray-800 {
-  background-color: #2d2d2d;
+  background-color: rgba(45, 45, 45, 0.8); /* Updated to be semi-transparent */
 }
 
 .text-gray-200 {

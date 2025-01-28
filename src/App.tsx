@@ -1,38 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX } from 'lucide-react';
 import io from 'socket.io-client';
 import './index.css'; // Import the CSS file
+import NowPlaying from './components/NowPlaying';
+import Controls from './components/Controls';
+import VolumeControl from './components/VolumeControl';
+import { fetchVolume, fetchNowPlaying, fetchPlaybackState, setVolume, seekPlayback, togglePlayPause, skipToNext, skipToPrevious } from './services/api';
 
 const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.5);
+  const [volume, setVolumeState] = useState(0.5);
   const [nowPlaying, setNowPlaying] = useState({ title: '', artist: '', artwork: '' });
   const [playbackTime, setPlaybackTime] = useState(0);
   const [playbackDuration, setPlaybackDuration] = useState(0);
 
   useEffect(() => {
-    const fetchVolume = async () => {
+    const fetchInitialVolume = async () => {
       try {
-        const response = await fetch('http://localhost:10767/api/v1/playback/volume');
-        const data = await response.json();
-        setVolume(data.volume);
+        const data = await fetchVolume();
+        setVolumeState(data.volume);
       } catch (error) {
         console.error('Error fetching volume:', error);
       }
     };
 
-    fetchVolume();
+    fetchInitialVolume();
 
-    const interval = setInterval(fetchVolume, 1000);
+    const interval = setInterval(fetchInitialVolume, 10000); // Fetch volume every 10 seconds
 
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); // Clear interval on component unmount
   }, []);
 
-  const fetchNowPlaying = async () => {
+  const fetchNowPlayingData = async () => {
     try {
-      const response = await fetch('http://localhost:10767/api/v1/playback/now-playing');
-      const data = await response.json();
+      const data = await fetchNowPlaying();
       setNowPlaying({ 
         title: data.info.name, 
         artist: data.info.artistName, 
@@ -43,10 +44,9 @@ const App = () => {
     }
   };
 
-  const fetchPlaybackState = async () => {
+  const fetchPlaybackStateData = async () => {
     try {
-      const response = await fetch('http://localhost:10767/api/v1/playback/is-playing');
-      const data = await response.json();
+      const data = await fetchPlaybackState();
       setIsPlaying(data.isPlaying);
     } catch (error) {
       console.error('Error fetching playback state:', error);
@@ -54,7 +54,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    fetchNowPlaying();
+    fetchNowPlayingData();
   }, []);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ const App = () => {
         setPlaybackDuration(data.data.currentPlaybackDuration);
         setIsPlaying(data.data.isPlaying);
 
-        fetchNowPlaying();
+        fetchNowPlayingData();
       }
     });
 
@@ -85,17 +85,11 @@ const App = () => {
 
   const handleVolumeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const linearVolume = parseFloat(e.target.value);
-    const exponentialVolume = Math.pow(linearVolume, 1.1); // Exponential transformation
-    setVolume(linearVolume);
+    const exponentialVolume = Math.pow(linearVolume, 2); // Exponential transformation
+    setVolumeState(linearVolume);
 
     try {
-      await fetch('http://localhost:10767/api/v1/playback/volume', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ volume: exponentialVolume }),
-      });
+      await setVolume(exponentialVolume);
     } catch (error) {
       console.error('Error setting volume:', error);
     }
@@ -106,13 +100,7 @@ const App = () => {
     setPlaybackTime(newPlaybackTime);
 
     try {
-      await fetch('http://localhost:10767/api/v1/playback/seek', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ position: newPlaybackTime }),
-      });
+      await seekPlayback(newPlaybackTime);
     } catch (error) {
       console.error('Error seeking playback:', error);
     }
@@ -120,10 +108,8 @@ const App = () => {
 
   const handlePlayPause = async () => {
     try {
-      await fetch('http://localhost:10767/api/v1/playback/playpause', {
-        method: 'POST',
-      });
-      fetchPlaybackState();
+      await togglePlayPause();
+      fetchPlaybackStateData();
     } catch (error) {
       console.error('Error toggling play/pause:', error);
     }
@@ -131,10 +117,8 @@ const App = () => {
 
   const handleNext = async () => {
     try {
-      await fetch('http://localhost:10767/api/v1/playback/next', {
-        method: 'POST',
-      });
-      fetchNowPlaying();
+      await skipToNext();
+      fetchNowPlayingData();
     } catch (error) {
       console.error('Error skipping to next track:', error);
     }
@@ -142,26 +126,17 @@ const App = () => {
 
   const handlePrevious = async () => {
     try {
-      await fetch('http://localhost:10767/api/v1/playback/previous', {
-        method: 'POST',
-      });
-      fetchNowPlaying();
+      await skipToPrevious();
+      fetchNowPlayingData();
     } catch (error) {
       console.error('Error skipping to previous track:', error);
     }
   };
 
   return (
-    <div className="min-h-screen rainbow-background flex items-center justify-center">
-      <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-96 outline-white bg-faded">
-        {/* Now Playing Section */}
-        <div className="mb-8 text-center">
-          <h2 className="text-gray-200 text-lg font-semibold mb-2 font-montserrat">Now Playing</h2>
-          <img src={nowPlaying.artwork} alt="Artwork" className="mb-4 w-48 h-48 mx-auto rounded-lg shadow-lg" />
-          <p className="text-gray-400 font-roboto">{nowPlaying.title || 'Song Title'}</p>
-          <p className="text-gray-500 text-sm font-roboto">{nowPlaying.artist || 'Artist Name'}</p>
-        </div>
-        {/* Progress Bar */}
+    <div className="min-h-screen bg-gradient-to-b from-purple-900 to-indigo-900 flex items-center justify-center">
+      <div className="bg-gray-800 bg-opacity-80 p-8 rounded-2xl shadow-2xl w-96">
+        <NowPlaying title={nowPlaying.title} artist={nowPlaying.artist} artwork={nowPlaying.artwork} />
         <div className="mb-6">
           <input
             type="range"
@@ -170,46 +145,15 @@ const App = () => {
             step="0.01"
             value={playbackTime}
             onChange={handleSeekChange}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer rainbow-element"
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
           />
-          <div className="flex justify-between text-gray-400 text-sm mt-1 font-roboto">
+          <div className="flex justify-between text-gray-400 text-sm mt-1">
             <span>{Math.floor(playbackTime / 60)}:{Math.floor(playbackTime % 60).toString().padStart(2, '0')}</span>
             <span>{Math.floor(playbackDuration / 60)}:{Math.floor(playbackDuration % 60).toString().padStart(2, '0')}</span>
           </div>
         </div>
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-6 mb-8">
-          <button className="text-gray-400 hover:text-white transition-colors rainbow-element" onClick={handlePrevious}>
-            <SkipBack size={24} />
-          </button>
-          <button 
-            className="bg-gradient-to-r from-pink-500 to-yellow-500 p-4 rounded-full hover:from-pink-600 hover:to-yellow-600 transition-colors rainbow-element"
-            onClick={handlePlayPause}
-          >
-            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-          </button>
-          <button className="text-gray-400 hover:text-white transition-colors rainbow-element" onClick={handleNext}>
-            <SkipForward size={24} />
-          </button>
-        </div>
-        {/* Volume Control */}
-        <div className="flex items-center gap-4">
-          <button 
-            className="text-gray-400 hover:text-white transition-colors rainbow-element"
-            onClick={() => setIsMuted(!isMuted)}
-          >
-            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          </button>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.001"
-            value={volume}
-            onChange={handleVolumeChange}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer rainbow-element"
-          />
-        </div>
+        <Controls isPlaying={isPlaying} onPlayPause={handlePlayPause} onNext={handleNext} onPrevious={handlePrevious} />
+        <VolumeControl isMuted={isMuted} volume={volume} onMuteToggle={() => setIsMuted(!isMuted)} onVolumeChange={handleVolumeChange} />
       </div>
     </div>
   );
