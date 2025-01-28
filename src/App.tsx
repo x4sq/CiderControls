@@ -4,7 +4,7 @@ import NowPlaying from './components/NowPlaying';
 import Controls from './components/Controls';
 import VolumeControl from './components/VolumeControl';
 import { initializeSocket, handleSocketEvents } from './services/socket';
-import { setVolume, seekPlayback, togglePlayPause, skipToNext, skipToPrevious } from './services/api';
+import { setVolume, seekPlayback, togglePlayPause, skipToNext, skipToPrevious, fetchNowPlaying } from './services/api';
 
 const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -14,6 +14,21 @@ const App = () => {
   const [playbackDuration, setPlaybackDuration] = useState(0);
 
   useEffect(() => {
+    const fetchInitialNowPlaying = async () => {
+      try {
+        const data = await fetchNowPlaying();
+        setNowPlaying({ 
+          title: data.info.name, 
+          artist: data.info.artistName, 
+          artwork: data.info.artwork.url.replace('{w}', '200').replace('{h}', '200') 
+        });
+      } catch (error) {
+        console.error('Error fetching now playing:', error);
+      }
+    };
+
+    fetchInitialNowPlaying();
+
     const socket = initializeSocket();
 
     handleSocketEvents(socket, {
