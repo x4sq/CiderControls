@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface VolumeControlProps {
   volume: number;
@@ -6,6 +6,17 @@ interface VolumeControlProps {
 }
 
 const VolumeControl: React.FC<VolumeControlProps> = ({ volume, onVolumeChange }) => {
+  const [localVolume, setLocalVolume] = useState(volume);
+
+  useEffect(() => {
+    setLocalVolume(volume);
+  }, [volume]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalVolume(parseFloat(e.target.value));
+    onVolumeChange(e);
+  };
+
   return (
     <div className="flex items-center gap-4">
       <input
@@ -13,8 +24,8 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ volume, onVolumeChange })
         min="0"
         max="1"
         step="0.01"
-        value={volume}
-        onChange={onVolumeChange}
+        value={localVolume}
+        onChange={handleChange}
         className="w-full h-3 bg-gray-700 rounded-lg appearance-none cursor-pointer"
       />
     </div>

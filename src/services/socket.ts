@@ -6,6 +6,8 @@ interface SocketHandlers {
   setIsPlaying: (isPlaying: boolean) => void;
   setNowPlaying: (nowPlaying: { title: string; artist: string; artwork: string }) => void;
   setVolumeState: (volume: number) => void;
+  setShuffleState: (data: number) => void;
+  setRepeatState: (data: number) => void;
 }
 
 export const initializeSocket = (): Socket => {
@@ -49,6 +51,10 @@ export const handleSocketEvents = (socket: Socket, handlers: SocketHandlers): vo
       } else {
         handlers.setIsPlaying(data.data.isPlaying);
       }
+    } else if (data.type === 'playerStatus.shuffleModeDidChange') {
+      handlers.setShuffleState(data.data);
+    } else if (data.type === 'playerStatus.repeatModeDidChange') {
+      handlers.setRepeatState(data.data);
     }
   });
 };

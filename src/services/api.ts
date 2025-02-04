@@ -43,3 +43,39 @@ export const fetchNowPlaying = async () => {
   }
   return response.json();
 };
+
+export const fetchVolume = async () => {
+  const response = await fetch('http://localhost:10767/api/v1/playback/volume');
+  if (!response.ok) {
+    throw new Error('Failed to fetch volume');
+  }
+  return response.json();
+};
+
+export const fetchShuffleMode = async () => {
+  const response = await fetch('http://localhost:10767/api/v1/playback/shuffle-mode');
+  if (!response.ok) {
+    throw new Error('Failed to fetch shuffle mode');
+  }
+  return response.json();
+};
+
+export const toggleShuffleMode = async () => {
+  await fetch('http://localhost:10767/api/v1/playback/toggle-shuffle', {
+    method: 'POST',
+  });
+};
+
+export const fetchRepeatMode = async () => {
+  const response = await fetch('http://localhost:10767/api/v1/playback/repeat-mode');
+  if (!response.ok) {
+    throw new Error('Failed to fetch repeat mode');
+  }
+  return response.json();
+};
+
+export const toggleRepeatMode = async () => {
+  await fetch('http://localhost:10767/api/v1/playback/toggle-repeat', {
+    method: 'POST',
+  });
+};
